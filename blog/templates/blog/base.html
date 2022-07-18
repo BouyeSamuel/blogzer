@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="style.css">
+    <title>Blogzer | {% block title %}Amazing{% endblock%} </title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+</head>
+
+<body>
+    <div id="sidebar">
+        {% block sidebar %}
+            <ul>
+                <li><a href="{% url "article_list" %}">Blogzer</a></li>
+            </ul>
+        {% endblock %}
+    </div>
+
+    <div id="content">
+        {% block content %}
+            Content here...
+        {% endblock %}
+    </div>
+</body>
+</html>

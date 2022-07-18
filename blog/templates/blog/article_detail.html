@@ -1,2 +1,6 @@
-<h2>{{ object.title }}</h2>
-<p>{{ object.body }}</p>
+{% extends 'blog/base.html' %}
+
+{% block content %}
+    <h2>{{ object.title }}</h2>
+    <p>{{ object.body }}</p>
+{% endblock %}
