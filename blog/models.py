@@ -4,7 +4,7 @@ from django.urls import reverse
 class Article(models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
-    slug = models.SlugField(null=True)
+    slug = models.SlugField(null=True, unique=True)
     pub_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -13,7 +13,7 @@ class Article(models.Model):
         return self.title
     
     def get_absolute_url(self):
-        return reverse("article_detail", kwargs={"pk": self.pk})
+        return reverse("article_detail", kwargs={"slug": self.slug})
     
 
 # class Comment(models.Model):
