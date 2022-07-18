@@ -1,10 +1,9 @@
 from django.db import models
-from django.contrib.auth import User
 from django.urls import reverse
 
 class Article(models.Model):
     title = models.CharField(max_length=255)
-    body = models.CharField()
+    body = models.TextField()
     slug = models.SlugField(null=True)
     pub_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
