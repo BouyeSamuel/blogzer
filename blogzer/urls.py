@@ -15,8 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from blog.views import register_request, login_request, logout_request
-
+from blog.views import register_request, login_request, logout_request, password_reset_request
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,5 +24,10 @@ urlpatterns = [
     path('register', register_request, name="register"),
     path('login', login_request, name="login"),
     path('logout', logout_request, name="logout"),
+    path('password-reset/', password_reset_request, name="password_reset"),
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name="blog/registration/password_reset_done.html"), name="password_reset_done"),
+    path('password-reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name="blog/registration/password_reset_confirme.html"), name="password_reset_confirm"),
+    path('password-reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name="blog/registration/password_reset_complete.html"), name="password_reset_complete"),
+    
     
 ]

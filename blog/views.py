@@ -4,7 +4,8 @@ from .models import Article
 from django.contrib.auth import login, authenticate, logout
 from .forms import NewUserForm
 from django.contrib import messages
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
+# from django.
 
 def register_request(request):
     if request.method == "POST":
@@ -41,6 +42,22 @@ def logout_request(request):
     logout(request)
     messages.success(request, "Your are successful logout")
     return redirect("article_list")
+
+
+def password_reset_request(request):
+    if request.method == "POST":
+        password_reset_form = PasswordResetForm(request.POST)
+        
+        if passord_reset_form.is_valid():
+            data = password_reset_form.cleaned_data['email']
+            associated_users = User.objects.filter(Q(email=data))
+            # mail = form.send_mail(
+            #     subject_template_name="Change Password",
+            #     email_template_name="blog/email/email.txt",
+            #     context={form},
+            #     from_email="bouyesophonie@gmail.com",
+            #     to_email=form.
+            #     )
 
 class ArticleListView(ListView):
     model = Article
