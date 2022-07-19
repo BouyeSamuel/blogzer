@@ -10,5 +10,7 @@
             {{ register_form|crispy }}
             <button class="btn btn-primary" type="submit">Register</button>
         </form>
+
+        <p class="text-center">You have already a account <a href="{% url "login" %}">"Sign in"</a></p>
     </div>
 {% endblock content %}
