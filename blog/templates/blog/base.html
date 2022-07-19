@@ -11,16 +11,22 @@
 <body>
     <div id="sidebar">
         {% block sidebar %}
-            <ul>
-                <li><a href="{% url "article_list" %}">Blogzer</a></li>
-            </ul>
+            <nav class="navbar navbar-dark bg-dark">
+                <div class="container-fluid">
+                      <div class="navbar-nav">
+                        <a class="nav-link active" aria-current="page" href="{% url "article_list" %}">Home</a>
+                    </div>
+                  </div>
+            </nav>
         {% endblock %}
     </div>
 
-    <div id="content">
-        {% block content %}
+    <div id="container content">
+        <div class="container-fluid">
+            {% block content %}
             Content here...
-        {% endblock %}
+            {% endblock %}
+        </div>
     </div>
 </body>
 </html>
