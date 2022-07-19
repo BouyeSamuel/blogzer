@@ -15,6 +15,13 @@
                 <div class="container-fluid">
                       <div class="navbar-nav">
                         <a class="nav-link active" aria-current="page" href="{% url "article_list" %}">Home</a>
+                        {% if request.user.is_authenticated %}
+                            <span class="nav-link">{{request.user.username}}</span>
+                            <a class="nav-link active" aria-current="page" href="#">Logout</a>
+                        {% else %}
+                            <a class="nav-link active" aria-current="page" href="{% url "register" %}">Register</a>
+                        {% endif %}
+
                     </div>
                   </div>
             </nav>
@@ -23,8 +30,10 @@
 
     <div id="container content">
         <div class="container-fluid">
+
             {% block content %}
             Content here...
+
             {% endblock %}
         </div>
     </div>
