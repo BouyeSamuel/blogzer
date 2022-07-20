@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.contrib.auth.models import User
 
 class Article(models.Model):
     title = models.CharField(max_length=255)
@@ -16,10 +17,10 @@ class Article(models.Model):
         return reverse("article_detail", kwargs={"slug": self.slug})
     
 
-# class Comment(models.Model):
-#     article = models.ForeignKey(Article, on_delete=models.CASCADE)
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     content = models.CharField()
+class Comment(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    body = models.TextField()
 
 # class Like(models.Model):
 #     user = models.ForeignKey(User, on_delete=models.CASCADE)

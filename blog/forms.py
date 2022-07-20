@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
+from blog.models import Comment
+
 class NewUserForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
@@ -17,6 +19,10 @@ class NewUserForm(UserCreationForm):
             user.save()
         return user
 
-# class CommentForm(forms.Form):
-#     name = forms.CharField()
-#     body = forms.forms.CharField(widget=forms.Textarea)
+
+class CommentForm(forms.Form):
+    body = forms.CharField(widget=forms.Textarea)
+    class Meta:
+        model = Comment
+        field = ['body']
+    

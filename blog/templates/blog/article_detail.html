@@ -7,17 +7,11 @@
 
 
     <h4 class="bt-5">Leave a comment</h4>
-    <form>
+    <form method="post">
+        {% csrf_token %}
         {{form|crispy}}
-        {% comment %} <div class="mb-3">
-            <input type="text" name="title" class="form-control" placeholder="Your name"/>            
-        </div>
-        <div class="mb-3 form-floating">
-            <textarea class="form-control" name="body" id="body" style="height: 100px"></textarea>
-            <label for="body">Comments</label>
-        </div>
-        <div class="mb-3">
+         <div class="mb-3">
             <button class="btn btn-primary" type="submit">Comment</button>
-        </div> {% endcomment %}
+         </div>
     </form>
 {% endblock %}

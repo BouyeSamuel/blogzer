@@ -1,9 +1,11 @@
+from multiprocessing import get_context
 from django.utils.http import urlsafe_base64_encode
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.views.generic import ListView, DetailView, FormView
-from .models import Article
+from django.views.generic.detail import SingleObjectMixin
+from .models import Article, Comment
 from django.contrib.auth import login, authenticate, logout
-from .forms import NewUserForm
+from .forms import NewUserForm, CommentForm
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.db.models.query_utils import Q
@@ -12,7 +14,9 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.template.loader import render_to_string
 from django.core.mail import send_mail, BadHeaderError
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import View
 
 def register_request(request):
     if request.method == "POST":
@@ -81,25 +85,54 @@ def password_reset_request(request):
     password_reset_form = PasswordResetForm()
     return render(request, template_name='blog/registration/password_reset.html', context={"password_reset_form":password_reset_form})
                         
-            # mail = form.send_mail(
-            #     subject_template_name="Change Password",
-            #     email_template_name="",
-            #     context={form},
-            #     from_email="bouyesophonie@gmail.com",
-            #     to_email=form.
-            #     )
-
 class ArticleListView(ListView):
     model = Article
     template_name = 'blog/article_list.html'
 
 
+class ArticleInterestCommentFormView(SingleObjectMixin,FormView):
+    template_name = 'blog/article_detail.html'
+    form_class = CommentForm
+    model = Article
+    
+    def post(self, request, *args, **kwargs):
+      if not request.user.is_authenticated:
+        return HttpResponseForbidden()
+      self.object = self.get_object()
+      form = self.get_form()
+      if form.is_valid():
+           return self.form_valid(form)
+      else:
+        return self.form_invalid(form)
+
+    def get_success_url(self):
+        return reverse('article_detail', kwargs={'slug': self.object.slug})
+
 class ArticleDetailView(DetailView):
     model = Article
+    # context_object_name = 'article'
     template_name = 'blog/article_detail.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = CommentForm()
+        print('********somthing********')
+        print(f"Debug context : {context}")
+        print('****************************')
+        print(f"Debug context form : {context['form']}")
+        print('********end somthing******')
+        return context
+    
+    
+class ArticleView(View):
+    
+    def get(self, request, *arg, **kwargs):
+        view = ArticleDetailView.as_view()
+        return view(request, *arg, **kwargs)
+    
+    def post(self, request, *arg, **kwargs):
+        view = ArticleInterestCommentFormView.as_view()
+        return view(request, *arg, **kwargs)
+    
+    
 
-
-# class CommentFormView(FormView):
-#     template_name = 'blog/article_list.html'
-#     form_class = CommentForm
-#     success_url = '/'
