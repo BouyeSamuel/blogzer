@@ -20,9 +20,7 @@ class NewUserForm(UserCreationForm):
         return user
 
 
-class CommentForm(forms.Form):
-    body = forms.CharField(widget=forms.Textarea)
+class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        field = ['body']
-    
+        fields = ['body']
