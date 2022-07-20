@@ -11,7 +11,7 @@
 <body>
     <div id="sidebar">
         {% block sidebar %}
-            <nav class="navbar navbar-dark bg-dark">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div class="container-fluid">
                       <div class="navbar-nav">
                         <a class="nav-link active" aria-current="page" href="{% url "article_list" %}">Home</a>
@@ -21,7 +21,6 @@
                         {% else %}
                             <a class="nav-link active" aria-current="page" href="{% url "register" %}">Register</a>
                             <a class="nav-link active" aria-current="page" href="{% url "login" %}">Login</a>                        {% endif %}
-
                     </div>
                   </div>
             </nav>
@@ -29,7 +28,7 @@
     </div>
 
     <div id="container content">
-        <div class="container-fluid">
+        <div class="container-fluid pt-3">
 
             {% block header %}
                 {% include 'blog/include/messages.html' %}
