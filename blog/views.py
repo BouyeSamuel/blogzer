@@ -1,11 +1,10 @@
-from multiprocessing import get_context
 from django.utils.http import urlsafe_base64_encode
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import ListView, DetailView, FormView
 from django.views.generic.detail import SingleObjectMixin
 from .models import Article, Comment
 from django.contrib.auth import login, authenticate, logout
-from .forms import NewUserForm, CommentForm
+from .forms import CommentFormAuthUser, CommentFormNotAuthUser, NewUserForm
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.db.models.query_utils import Q
@@ -92,7 +91,7 @@ class ArticleListView(ListView):
 
 class ArticleInterestCommentFormView(SingleObjectMixin,FormView):
     template_name = 'blog/article_detail.html'
-    form_class = CommentForm
+    form_class = CommentFormAuthUser
     model = Article
     
     def post(self, request, *args, **kwargs):
@@ -101,7 +100,7 @@ class ArticleInterestCommentFormView(SingleObjectMixin,FormView):
       self.object = self.get_object()
       form = self.get_form()
       if form.is_valid():
-        return print(f"Debug request {request.POST}")
+        return print(f"Debug request {request.user.first_name}")
       else:
         return self.form_invalid(form)
 
@@ -110,27 +109,27 @@ class ArticleInterestCommentFormView(SingleObjectMixin,FormView):
 
 class ArticleDetailView(DetailView):
     model = Article
-    # context_object_name = 'article'
+    # form_class = CommentFormAuthUser
     template_name = 'blog/article_detail.html'
     
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['form'] = CommentForm()
-        print('********somthing********')
-        print(f"Debug context : {context}")
-        print('****************************')
-        print(f"Debug context form : {context['form']}")
-        print('********end somthing******')
+        context = super(ArticleDetailView, self).get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            context['form'] = CommentFormAuthUser()
+        else:
+            context['form'] = CommentFormNotAuthUser()
         return context
     
     
 class ArticleView(View):
-    
+
     def get(self, request, *arg, **kwargs):
+        print('***** get')
         view = ArticleDetailView.as_view()
         return view(request, *arg, **kwargs)
     
     def post(self, request, *arg, **kwargs):
+        print('***** post')
         view = ArticleInterestCommentFormView.as_view()
         return view(request, *arg, **kwargs)
     

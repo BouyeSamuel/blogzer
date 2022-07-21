@@ -18,8 +18,7 @@ class Article(models.Model):
     
 
 class Comment(models.Model):
-    first_name = models.CharField(max_length=80)
-    last_name = models.CharField(max_length=80)
+    username = models.CharField(max_length=80)
     email = models.EmailField(unique=True, null=True)
     body = models.TextField()
     article = models.ForeignKey(Article, on_delete=models.CASCADE)

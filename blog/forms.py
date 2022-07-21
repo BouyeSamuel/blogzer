@@ -20,7 +20,15 @@ class NewUserForm(UserCreationForm):
         return user
 
 
-class CommentForm(forms.ModelForm):
+class CommentFormNotAuthUser(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['username', 'email', 'body']
+
+            
+class CommentFormAuthUser(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['body']
+
+            
