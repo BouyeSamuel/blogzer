@@ -14,4 +14,15 @@
             <button class="btn btn-primary" type="submit">Comment</button>
          </div>
     </form>
+
+    <h3>All comments :</h3>
+    <ul>
+    {% for comment in comments %}
+        <li class="mt-2 p-3 list-unstyled border border-1 rounded">
+            <p class="fw-bold">{{comment.username}}</p>
+            <p class="fw-normal">{{comment.body}}</p>
+            <span>{{comment.created_at|date:'F d H:i' }}</span>
+        </li>
+    {% endfor %}
+    </ul>
 {% endblock %}

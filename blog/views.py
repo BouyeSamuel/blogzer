@@ -106,8 +106,8 @@ class ArticleInterestCommentFormView(SingleObjectMixin, FormView, FormMixin):
         new_comment = None
         article = get_object_or_404(Article, slug=self.object.slug)
         
-        # comments = article.comments.get()
-        # print(comments)
+        comments = article.comments.all()
+        print(comments)
         form = self.get_form()
         
         self.object = self.get_object()
@@ -142,9 +142,10 @@ class ArticleInterestCommentFormView(SingleObjectMixin, FormView, FormMixin):
 class ArticleDetailView(DetailView):
     model = Article
     template_name = 'blog/article_detail.html'
-    
+
     def get_context_data(self, **kwargs):
         context = super(ArticleDetailView, self).get_context_data(**kwargs)
+        context['comments'] = self.get_object().comments.order_by('-created_at')
         if self.request.user.is_authenticated:
             context['form'] = CommentFormAuthUser()
         else:
