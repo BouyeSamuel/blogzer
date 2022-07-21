@@ -1,9 +1,10 @@
 from django.utils.http import urlsafe_base64_encode
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.views.generic import ListView, DetailView, FormView
+from django.views.generic.detail import SingleObjectMixin
 from .models import Article
 from django.contrib.auth import login, authenticate, logout
-from .forms import NewUserForm
+from .forms import CommentFormAuthUser, CommentFormNotAuthUser, NewUserForm
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.db.models.query_utils import Q
@@ -12,7 +13,10 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.template.loader import render_to_string
 from django.core.mail import send_mail, BadHeaderError
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import View
+from django.views.generic.edit import FormMixin
 
 def register_request(request):
     if request.method == "POST":
@@ -81,25 +85,84 @@ def password_reset_request(request):
     password_reset_form = PasswordResetForm()
     return render(request, template_name='blog/registration/password_reset.html', context={"password_reset_form":password_reset_form})
                         
-            # mail = form.send_mail(
-            #     subject_template_name="Change Password",
-            #     email_template_name="",
-            #     context={form},
-            #     from_email="bouyesophonie@gmail.com",
-            #     to_email=form.
-            #     )
-
 class ArticleListView(ListView):
     model = Article
     template_name = 'blog/article_list.html'
 
 
+class ArticleInterestCommentFormView(SingleObjectMixin, FormView, FormMixin):
+    template_name = 'blog/article_detail.html'
+    model = Article
+    
+    def get_form_class(self):
+        if self.request.user.is_authenticated:
+            self.form_class = CommentFormAuthUser
+        else:
+            self.form_class = CommentFormNotAuthUser
+        return self.form_class
+    
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        new_comment = None
+        article = get_object_or_404(Article, slug=self.object.slug)
+        
+        # comments = article.comments.get()
+        # print(comments)
+        form = self.get_form()
+        
+        self.object = self.get_object()
+
+        if not request.user.is_authenticated:
+            if form.is_valid():
+                new_comment = form.save(commit=False)
+                new_comment.article = article
+                new_comment.save()
+                return super().form_valid(form)
+        if form.is_valid():
+            try:
+                user = User.objects.filter(pk=request.user.pk).first()
+            except User.DoesNotExist:
+                print('user not exist')
+            
+            new_comment = form.save(commit=False)
+            new_comment.username = user.username
+            new_comment.email = user.email
+            new_comment.article = article
+            new_comment.save()
+            # return new_comment
+            return super().form_valid(form)
+        # print(Article.objects.filter(pk=request.article.pk))
+            # return print(f"Debug request {request.user.username}")
+        else:
+            return self.form_invalid(form)
+
+    def get_success_url(self):
+        return reverse('article_detail', kwargs={'slug': self.object.slug})
+
 class ArticleDetailView(DetailView):
     model = Article
     template_name = 'blog/article_detail.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super(ArticleDetailView, self).get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            context['form'] = CommentFormAuthUser()
+        else:
+            context['form'] = CommentFormNotAuthUser()
+        return context
+    
+    
+class ArticleView(View):
 
+    def get(self, request, *arg, **kwargs):
+        print('***** get')
+        view = ArticleDetailView.as_view()
+        return view(request, *arg, **kwargs)
+    
+    def post(self, request, *arg, **kwargs):
+        print('***** post')
+        view = ArticleInterestCommentFormView.as_view()
+        return view(request, *arg, **kwargs)
+    
+    
 
-# class CommentFormView(FormView):
-#     template_name = 'blog/article_list.html'
-#     form_class = CommentForm
-#     success_url = '/'
