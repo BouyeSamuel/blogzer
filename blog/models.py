@@ -19,9 +19,9 @@ class Article(models.Model):
 
 class Comment(models.Model):
     username = models.CharField(max_length=80)
-    email = models.EmailField(unique=True, null=True)
+    email = models.EmailField()
     body = models.TextField()
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, related_name='comments', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
@@ -30,7 +30,7 @@ class Comment(models.Model):
         ordering = ['created_at']
         
     def __str__(self):
-        return f'Comment by {self.first_name} on {self.article}'
+        return f'Comment by {self.username} on {self.article}'
 
 # class Like(models.Model):
 #     user = models.ForeignKey(User, on_delete=models.CASCADE)

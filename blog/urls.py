@@ -2,7 +2,7 @@ from urllib import request
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import ArticleListView, ArticleDetailView, ArticleView
+from .views import ArticleListView, ArticleView
 from . import views
 
 urlpatterns = [

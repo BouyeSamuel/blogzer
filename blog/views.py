@@ -1,8 +1,8 @@
 from django.utils.http import urlsafe_base64_encode
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.views.generic import ListView, DetailView, FormView
 from django.views.generic.detail import SingleObjectMixin
-from .models import Article, Comment
+from .models import Article
 from django.contrib.auth import login, authenticate, logout
 from .forms import CommentFormAuthUser, CommentFormNotAuthUser, NewUserForm
 from django.contrib import messages
@@ -16,6 +16,7 @@ from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
+from django.views.generic.edit import FormMixin
 
 def register_request(request):
     if request.method == "POST":
@@ -89,27 +90,57 @@ class ArticleListView(ListView):
     template_name = 'blog/article_list.html'
 
 
-class ArticleInterestCommentFormView(SingleObjectMixin,FormView):
+class ArticleInterestCommentFormView(SingleObjectMixin, FormView, FormMixin):
     template_name = 'blog/article_detail.html'
-    form_class = CommentFormAuthUser
     model = Article
     
+    def get_form_class(self):
+        if self.request.user.is_authenticated:
+            self.form_class = CommentFormAuthUser
+        else:
+            self.form_class = CommentFormNotAuthUser
+        return self.form_class
+    
     def post(self, request, *args, **kwargs):
-      if not request.user.is_authenticated:
-        return HttpResponseForbidden()
-      self.object = self.get_object()
-      form = self.get_form()
-      if form.is_valid():
-        return print(f"Debug request {request.user.first_name}")
-      else:
-        return self.form_invalid(form)
+        self.object = self.get_object()
+        new_comment = None
+        article = get_object_or_404(Article, slug=self.object.slug)
+        
+        # comments = article.comments.get()
+        # print(comments)
+        form = self.get_form()
+        
+        self.object = self.get_object()
+
+        if not request.user.is_authenticated:
+            if form.is_valid():
+                new_comment = form.save(commit=False)
+                new_comment.article = article
+                new_comment.save()
+                return super().form_valid(form)
+        if form.is_valid():
+            try:
+                user = User.objects.filter(pk=request.user.pk).first()
+            except User.DoesNotExist:
+                print('user not exist')
+            
+            new_comment = form.save(commit=False)
+            new_comment.username = user.username
+            new_comment.email = user.email
+            new_comment.article = article
+            new_comment.save()
+            # return new_comment
+            return super().form_valid(form)
+        # print(Article.objects.filter(pk=request.article.pk))
+            # return print(f"Debug request {request.user.username}")
+        else:
+            return self.form_invalid(form)
 
     def get_success_url(self):
         return reverse('article_detail', kwargs={'slug': self.object.slug})
 
 class ArticleDetailView(DetailView):
     model = Article
-    # form_class = CommentFormAuthUser
     template_name = 'blog/article_detail.html'
     
     def get_context_data(self, **kwargs):
