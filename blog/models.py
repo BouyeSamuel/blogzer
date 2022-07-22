@@ -46,9 +46,10 @@ class Comment(models.Model):
     def __str__(self):
         return f'Comment by {self.username} on {self.article}'
 
-# class Like(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     article = models.ForeignKey(Article, on_delete=models.CASCADE)
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    liked = models.BooleanField(default=True)
 
 
 
