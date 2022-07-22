@@ -15,6 +15,15 @@
          </div>
     </form>
 
+    <ul>
+        <p class="fw-bold">Categories:</p> 
+        {% for category in categories %}
+            <li>
+                {{category}}
+            </li>
+        {% endfor %}
+    </ul>
+
     <h3>All comments :</h3>
     <ul>
     {% for comment in comments %}

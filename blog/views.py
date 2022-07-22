@@ -146,6 +146,7 @@ class ArticleDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(ArticleDetailView, self).get_context_data(**kwargs)
         context['comments'] = self.get_object().comments.order_by('-created_at')
+        context['categories'] = self.get_object().category.all()
         if self.request.user.is_authenticated:
             context['form'] = CommentFormAuthUser()
         else:
