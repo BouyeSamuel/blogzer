@@ -14,6 +14,15 @@
             <button class="btn btn-primary" type="submit">Comment</button>
          </div>
     </form>
+    {{liked}}
+    <div>
+        <form enctype="multipart/form-data" action="{% url "article_detail_like" %}" method="POST" id="formData">
+            {% csrf_token %}
+            <input type="hidden" id="article_pk" name="article_pk" value="{{ object.pk }}" />
+            <input type="hidden" id="user_pk" name="user_pk" value="{{ request.user.pk }}"/>
+            <button type="submit">Like</button>
+        </form>
+    </div>
 
     <ul>
         <p class="fw-bold">Categories:</p> 
@@ -34,4 +43,36 @@
         </li>
     {% endfor %}
     </ul>
+{% endblock %}
+
+
+{% block script %}
+<script>
+    let form = document.getElementById('formData').addEventListener("submit", (e) => {
+        e.preventDefault()
+
+        let article_pk = document.getElementById('article_pk')
+        let user_pk = document.getElementById('user_pk')
+
+        const formData = new FormData()
+        formData.append('article_pk', article_pk.value)
+        formData.append('user_pk', user_pk.value)
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
+
+        fetch('{% url "article_detail_like" %}', {
+            method: "POST",
+            body: formData
+        })
+        .then(response => {
+            return response.json()
+        })
+        .then(data => {
+            console.log('Success', data)
+        })
+        .catch(err => {
+            console.log('Error: ', err)
+        })
+
+    })
+</script>
 {% endblock %}

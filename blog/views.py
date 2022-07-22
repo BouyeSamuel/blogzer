@@ -2,7 +2,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.views.generic import ListView, DetailView, FormView
 from django.views.generic.detail import SingleObjectMixin
-from .models import Article, Category
+from .models import Article, Category, Like
 from django.contrib.auth import login, authenticate, logout
 from .forms import CommentFormAuthUser, CommentFormNotAuthUser, NewUserForm
 from django.contrib import messages
@@ -13,7 +13,7 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.template.loader import render_to_string
 from django.core.mail import send_mail, BadHeaderError
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.views.generic.edit import FormMixin
@@ -166,7 +166,6 @@ class ArticleView(View):
         view = ArticleInterestCommentFormView.as_view()
         return view(request, *arg, **kwargs)
     
-    
 class CategoryListView(ListView):
     model = Category
     template_name = 'blog/categories.html'
@@ -179,3 +178,31 @@ class CategoryDetailView(DetailView):
         context = super(CategoryDetailView, self).get_context_data(**kwargs)
         context['articles'] = Article.objects.filter(category=self.object)
         return context
+    
+    
+def like_request(request):
+    
+    if request.method == "POST":
+        article =   get_object_or_404(Article,pk=request.POST.get('article_pk'))
+        user = get_object_or_404(User,pk=request.POST.get('user_pk'))
+        
+        likes = Like.objects.filter(article=article)
+        like_obj = Like.objects.get(article=article, user=user)
+
+        if like_obj == Like.DoesNotExist:
+            new_like = Like.objects.create(article=article, user=user)
+            new_like.save()
+            liked = 'new'
+        elif like_obj and like_obj.liked:
+            print('should false')
+            print(like_obj.liked)
+            like_obj.liked = False
+            like_obj.save()
+            liked = 'false'
+        elif like_obj and like_obj.liked == False:
+            print('should true')            
+            print(like_obj.liked)
+            like_obj.liked = True
+            like_obj.save()
+            liked = 'true'
+    return render(request, 'blog/article_detail.html', {'likes': likes, 'liked': liked})
