@@ -19,7 +19,7 @@
         <p class="fw-bold">Categories:</p> 
         {% for category in categories %}
             <li>
-                {{category}}
+                <a href="{% url "category_detail" category.pk %}">{{category}}</a>
             </li>
         {% endfor %}
     </ul>
