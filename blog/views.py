@@ -2,7 +2,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.views.generic import ListView, DetailView, FormView
 from django.views.generic.detail import SingleObjectMixin
-from .models import Article
+from .models import Article, Category
 from django.contrib.auth import login, authenticate, logout
 from .forms import CommentFormAuthUser, CommentFormNotAuthUser, NewUserForm
 from django.contrib import messages
@@ -167,4 +167,15 @@ class ArticleView(View):
         return view(request, *arg, **kwargs)
     
     
-
+class CategoryListView(ListView):
+    model = Category
+    template_name = 'blog/categories.html'
+    
+class CategoryDetailView(DetailView):
+    model = Category
+    template_name = 'blog/category.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super(CategoryDetailView, self).get_context_data(**kwargs)
+        context['articles'] = Article.objects.filter(category=self.object)
+        return context
