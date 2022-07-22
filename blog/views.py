@@ -183,7 +183,6 @@ class CategoryDetailView(DetailView):
 def like_request(request):
     
     if request.method == "POST":
-        # user = get_object_or_404(User, pk=request.POST.get('user_id'))
         article =   get_object_or_404(Article,pk=request.POST.get('article_pk'))
         user = get_object_or_404(User,pk=request.POST.get('user_pk'))
         
