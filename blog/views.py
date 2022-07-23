@@ -181,28 +181,30 @@ class CategoryDetailView(DetailView):
     
     
 def like_request(request):
-    
     if request.method == "POST":
         article =   get_object_or_404(Article,pk=request.POST.get('article_pk'))
         user = get_object_or_404(User,pk=request.POST.get('user_pk'))
         
-        likes = Like.objects.filter(article=article)
-        like_obj = Like.objects.get(article=article, user=user)
+        likes = Like.objects.filter(article_id=article.pk)
+        user_in_like = Like.objects.filter(user=user)
+        if likes:
+            if user_in_like:
+                like_obj = Like.objects.get(article=article,user=user)
+                if like_obj and like_obj.liked:
+                    print('should false')
+                    print(like_obj.liked)
+                    like_obj.liked = False
+                    like_obj.save()
+                    liked = 'false'
+                elif like_obj and like_obj.liked == False:
+                    print('should true')            
+                    print(like_obj.liked)
+                    like_obj.liked = True
+                    like_obj.save()
+                    liked = 'true'
+                return print(like_obj)
+        new_like = Like.objects.create(article=article, user=user)
+        new_like.save()
+        liked = 'new'
 
-        if like_obj == Like.DoesNotExist:
-            new_like = Like.objects.create(article=article, user=user)
-            new_like.save()
-            liked = 'new'
-        elif like_obj and like_obj.liked:
-            print('should false')
-            print(like_obj.liked)
-            like_obj.liked = False
-            like_obj.save()
-            liked = 'false'
-        elif like_obj and like_obj.liked == False:
-            print('should true')            
-            print(like_obj.liked)
-            like_obj.liked = True
-            like_obj.save()
-            liked = 'true'
     return render(request, 'blog/article_detail.html', {'likes': likes, 'liked': liked})
