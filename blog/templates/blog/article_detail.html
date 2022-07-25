@@ -18,7 +18,6 @@
     <div>
         {% if request.user.is_authenticated %}
         <form action="{% url "article_detail_like" %}" method="POST" id="formData">
-            {% csrf_token %}
             <input type="hidden" id="article_pk" name="article_pk" value="{{ object.pk }}" />
             <input type="hidden" id="user_pk" name="user_pk" value="{{ request.user.pk }}"/>
             <button type="submit">Like</button>
