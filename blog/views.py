@@ -17,6 +17,8 @@ from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.views.generic.edit import FormMixin
+import json
+from django.core import serializers
 
 def register_request(request):
     if request.method == "POST":
@@ -181,28 +183,40 @@ class CategoryDetailView(DetailView):
     
     
 def like_request(request):
-    
     if request.method == "POST":
         article =   get_object_or_404(Article,pk=request.POST.get('article_pk'))
         user = get_object_or_404(User,pk=request.POST.get('user_pk'))
         
-        likes = Like.objects.filter(article=article)
-        like_obj = Like.objects.get(article=article, user=user)
-
-        if like_obj == Like.DoesNotExist:
+        likes = Like.objects.filter(article_id=article.pk)
+        tempJson = serializers.serialize("json", likes)
+        jsonObj = json.loads(tempJson)
+        user_in_like = Like.objects.filter(user=user)
+        if likes:
+            print('*** like_obj')
+            try:
+                like_obj = Like.objects.get(article=article,user=user)
+            except Like.DoesNotExist:
+                like_obj = False
+        
+        if like_obj is False:
             new_like = Like.objects.create(article=article, user=user)
             new_like.save()
             liked = 'new'
+            print('I have find bro I create a new') 
+            return JsonResponse(jsonObj, safe=False)
         elif like_obj and like_obj.liked:
-            print('should false')
-            print(like_obj.liked)
+            # should false
             like_obj.liked = False
             like_obj.save()
             liked = 'false'
-        elif like_obj and like_obj.liked == False:
-            print('should true')            
-            print(like_obj.liked)
+            # html = render_to_string('blog/article_detail.html', {'likes': likes, 'liked': liked})
+            return JsonResponse(jsonObj, safe=False)
+        elif like_obj and like_obj.liked is False:
+            # should true            
             like_obj.liked = True
             like_obj.save()
             liked = 'true'
-    return render(request, 'blog/article_detail.html', {'likes': likes, 'liked': liked})
+            # html = render_to_string('blog/article_detail.html', {'likes': likes, 'liked': liked})
+            return JsonResponse(jsonObj, safe=False)
+
+    return JsonResponse(jsonObj, safe=False)
