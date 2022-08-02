@@ -1,3 +1,2 @@
 mysqlclient
-crispy
 crispy-bootstrap5
