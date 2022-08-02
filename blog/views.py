@@ -1,6 +1,6 @@
 from django.utils.http import urlsafe_base64_encode
 from django.shortcuts import render, redirect, reverse, get_object_or_404
-from django.views.generic import ListView, DetailView, FormView
+from django.views.generic import ListView, DetailView, FormView, TemplateView
 from django.views.generic.detail import SingleObjectMixin
 from .models import Article, Category, Like
 from django.contrib.auth import login, authenticate, logout
@@ -181,42 +181,25 @@ class CategoryDetailView(DetailView):
         context['articles'] = Article.objects.filter(category=self.object)
         return context
     
-    
-def like_request(request):
-    if request.method == "POST":
-        article =   get_object_or_404(Article,pk=request.POST.get('article_pk'))
-        user = get_object_or_404(User,pk=request.POST.get('user_pk'))
-        
-        likes = Like.objects.filter(article_id=article.pk)
-        tempJson = serializers.serialize("json", likes)
-        jsonObj = json.loads(tempJson)
-        user_in_like = Like.objects.filter(user=user)
-        if likes:
-            print('*** like_obj')
-            try:
-                like_obj = Like.objects.get(article=article,user=user)
-            except Like.DoesNotExist:
-                like_obj = False
-        
-        if like_obj is False:
-            new_like = Like.objects.create(article=article, user=user)
-            new_like.save()
-            liked = 'new'
-            print('I have find bro I create a new') 
-            return JsonResponse(jsonObj, safe=False)
-        elif like_obj and like_obj.liked:
-            # should false
-            like_obj.liked = False
-            like_obj.save()
-            liked = 'false'
-            # html = render_to_string('blog/article_detail.html', {'likes': likes, 'liked': liked})
-            return JsonResponse(jsonObj, safe=False)
-        elif like_obj and like_obj.liked is False:
-            # should true            
-            like_obj.liked = True
-            like_obj.save()
-            liked = 'true'
-            # html = render_to_string('blog/article_detail.html', {'likes': likes, 'liked': liked})
-            return JsonResponse(jsonObj, safe=False)
 
-    return JsonResponse(jsonObj, safe=False)
+class LikeView(LoginRequiredMixin, TemplateView):
+    def post(self, request, *arg, **kwargs):
+        article = get_object_or_404(Article, slug=self.kwargs.get("slug"))
+        user = self.request.user
+        likes = Like.objects.filter(article=article)
+        if likes:
+            like_obj = Like.objects.get(article=article, user=user)
+        else:
+            like_obj = False
+
+        if like_obj is False:
+            like = Like.objects.create(article=article, user=user)
+            like.save()
+        else:
+            like_obj.delete()
+        return HttpResponse(json.dumps('post liked'), content_type="application/json")
+
+    def get(self, request, *args, **kwargs):
+        article = get_object_or_404(Article, slug=self.kwargs.get("slug"))
+        likes = Like.objects.filter(article=article, liked=True).count()
+        return HttpResponse(json.dumps(likes), content_type="application/json")

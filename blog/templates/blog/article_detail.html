@@ -14,10 +14,10 @@
             <button class="btn btn-primary" type="submit">Comment</button>
          </div>
     </form>
-    {{liked}}
+    <span id="likes_c"></span>
     <div>
         {% if request.user.is_authenticated %}
-        <form action="{% url "article_detail_like" %}" method="POST" id="formData">
+        <form action="{% url "article_detail_like" object.slug %}" method="POST" id="formData">
             <input type="hidden" id="article_pk" name="article_pk" value="{{ object.pk }}" />
             <input type="hidden" id="user_pk" name="user_pk" value="{{ request.user.pk }}"/>
             <button type="submit">Like</button>
@@ -48,8 +48,10 @@
 
 
 {% block script %}
+
 <script>
-    let form = document.getElementById('formData').addEventListener("submit", (e) => {
+    let form = document.getElementById('formData')
+    form.addEventListener("submit", (e) => {
         e.preventDefault()
 
         let article_pk = document.getElementById('article_pk')
@@ -60,7 +62,7 @@
         formData.append('user_pk', user_pk.value)
         formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
 
-        fetch('{% url "article_detail_like" %}', {
+        fetch(form.action, {
             method: "POST",
             body: formData
         })
@@ -69,10 +71,29 @@
         })
         .then(data => {
             console.log('Success', data)
+            freshLike()
         })
         .catch(err => {
             console.log('Error: ', err)
         })
     })
+
+    function freshLike() {
+        fetch(form.action, {
+            method: "GET"
+        })
+        .then(response => {
+            return response.json()
+        })
+        .then(data => {
+            console.log('data: ', data)
+            document.getElementById('likes_c').innerText = data
+        })
+        .catch(err => {
+            console.log('Error: ', err)
+        })
+    }
+
+    freshLike()
 </script>
 {% endblock %}
