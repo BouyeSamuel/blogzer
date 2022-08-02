@@ -182,7 +182,7 @@ class CategoryDetailView(DetailView):
         return context
     
 
-class LikeView(LoginRequiredMixin,TemplateView):
+class LikeView(TemplateView):
     def post(self, request, *arg, **kwargs):
         article = get_object_or_404(Article, slug=self.kwargs.get("slug"))
         user = self.request.user
