@@ -21,8 +21,8 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Dependencies
-      run:  apt-get install python3-dev default-libmysqlclient-dev
+    - name: Install Dependencies Python
+      run:  sudo apt-get install python3-dev default-libmysqlclient-dev
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
