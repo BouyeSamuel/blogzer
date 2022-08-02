@@ -14,15 +14,15 @@
             <button class="btn btn-primary" type="submit">Comment</button>
          </div>
     </form>
-    <span id="likes_c"></span>
+    like : <span id="likes_c"></span>
     <div>
-        {% if request.user.is_authenticated %}
         <form action="{% url "article_detail_like" object.slug %}" method="POST" id="formData">
+            {% if request.user.is_authenticated %}
             <input type="hidden" id="article_pk" name="article_pk" value="{{ object.pk }}" />
             <input type="hidden" id="user_pk" name="user_pk" value="{{ request.user.pk }}"/>
             <button type="submit">Like</button>
+            {% endif %}
         </form>
-        {% endif %}
     </div>
 
     <ul>
@@ -79,7 +79,7 @@
     })
 
     function freshLike() {
-        fetch(form.action, {
+        fetch('{% url "article_detail_like" object.slug %}', {
             method: "GET"
         })
         .then(response => {
