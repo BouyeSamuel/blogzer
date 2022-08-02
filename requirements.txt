@@ -1,0 +1,2 @@
+mysqlclient
+crispy-bootstrap5
